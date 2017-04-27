@@ -25,9 +25,14 @@ else
 	exit 2
 fi
 
+get_worldwide_mirrors() {
+	_download 'https://www.archlinux.org/mirrorlist/?country=all&protocol=http&protocol=https&ip_version=4' | awk '/^## /{if ($2 == "Worldwide") { flag=1 } else { flag=0 } } /^#Server/ { if (flag) { sub(/\/\$repo.*/, ""); print $3 } }'
+}
+
 cpu_type=$(uname -m)
 
 is_openvz() { [ -d /proc/vz -a ! -d /proc/bc ]; }
+is_lxc() { grep -aqw container=lxc /proc/1/environ ; }
 
 download() {
 	local path="$1" x=
@@ -162,7 +167,7 @@ configure_bootloader() {
 			root_dev=$(pvs --noheadings | awk -v vg="$vg" '($2 == vg) { print $1 }')
 		fi
 		for root_dev in $root_dev; do
-			tmp=$(lsblk -npsro NAME "$root_dev" | tail -n1)
+			tmp=$(lsblk -npsro TYPE,NAME "$root_dev" | awk '($1 == "disk") { print $2}')
 			case " $root_devs " in
 			*" $tmp "*) 	;;
 			*)		root_devs="${root_devs:+$root_devs }$tmp"	;;
@@ -190,10 +195,10 @@ configure_network() {
 	local gateway dev ip
 
 	read -r dev gateway <<-EOF
-		$(awk '$2 == 00000000 { ip = strtonum(sprintf("0x%s", $3));
+		$(awk '$2 == "00000000" { ip = strtonum(sprintf("0x%s", $3));
 			printf ("%s\t%d.%d.%d.%d", $1,
 			rshift(and(ip,0x000000ff),00), rshift(and(ip,0x0000ff00),08),
-			rshift(and(ip,0x00ff0000),16), rshift(and(ip,0xff000000),24)) }' < /proc/net/route)
+			rshift(and(ip,0x00ff0000),16), rshift(and(ip,0xff000000),24)) ; exit }' < /proc/net/route)
 	EOF
 
 	set -- $(ip addr show dev "$dev" | awk '($1 == "inet") { print $2 }')
@@ -228,6 +233,7 @@ configure_network() {
 	fi
 
 	systemctl enable sshd
+	systemctl enable dhcpcd
 }
 
 finalize() {
@@ -321,11 +327,14 @@ while getopts ":b:m:n:h" opt; do
 done
 shift $((OPTIND - 1))
 
-: ${mirrors:="http://mirror.rackspace.com/archlinux http://dgix.ru/mirrors/archlinux"}
+[ -z "$mirrors" ] && mirrors=$(get_worldwide_mirrors)
+
 
 if is_openvz; then
 	bootloader=none
 	network=netctl
+elif is_lxc; then
+	bootloader=none
 fi
 
 cd /
