@@ -93,10 +93,10 @@ china_dns(){
     echo "${dnsconf} was unable to modify."
   else
     cat >${dnsconf}<<-EOF
-    options timeout:1 attempts:1 rotate
-    nameserver 180.76.76.76
-    nameserver 119.29.29.29
-    nameserver 223.5.5.5
+options timeout:1 attempts:1 rotate
+nameserver 180.76.76.76
+nameserver 119.29.29.29
+nameserver 223.5.5.5
 EOF
     chattr +i ${dnsconf}
     echo "System DNS has been update."
@@ -109,6 +109,8 @@ setdns(){
     china_dns
   fi
 }
+
+setdns
 
 # update the mirrorlist to the local sever
 mirrorupdate(){
@@ -154,9 +156,9 @@ bbr_enable(){
   bbrconf=/etc/sysctl.d/99-sysctl.conf
   touch ${bbrconf}
   cat >${bbrconf}<<-EOF
-  net.core.default_qdisc = fq
-  net.ipv4.tcp_congestion_control = bbr
-  net.ipv4.tcp_fastopen = 3
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+net.ipv4.tcp_fastopen = 3
 EOF
 
 sysctl --system 1>/dev/null
@@ -173,7 +175,7 @@ arch_devel(){
   pacman -Sy base-devel python-pip tmux vim lua nmap yaourt zmap git zsh \
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
-    --noconfirm &>/dev/null
+    speedtest-cli --noconfirm &>/dev/null
 }
 
 arch_devel
@@ -189,39 +191,39 @@ ss_local(){
   printf "\n"
   read -p "local_port: " localport
   cat >/etc/shadowsocks.json<<-EOF
-  {
-    "server":"${server}",
-    "server_port":${serverport},
-    "method":"${method}",
-    "password":"${password}",
-    "plugin":"obfs-local",
-    "plugin_opts":"obfs=tls;obfs-host=www.baidu.com",
-    "timeout":60,
-    "local_port":${localport}
-  }
+{
+  "server":"${server}",
+  "server_port":${serverport},
+  "method":"${method}",
+  "password":"${password}",
+  "plugin":"obfs-local",
+  "plugin_opts":"obfs=tls;obfs-host=www.baidu.com",
+  "timeout":60,
+  "local_port":${localport}
+}
 EOF
   echo "shadowsock.json done."
 
   cat >/etc/systemd/system/shadowsocks.service<<-EOF
-    [Uint]
-    Description=Shadowsocks-libev
-    Wants=network-online.target
-    After=network.target
+[Uint]
+Description=Shadowsocks-libev
+Wants=network-online.target
+After=network.target
 
-    [Service]
-    Type=simple
-    ExecStart=/usr/bin/ss-local -c /etc/shadowsocks.json -u --fast-open
+[Service]
+Type=simple
+ExecStart=/usr/bin/ss-local -c /etc/shadowsocks.json -u --fast-open
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
   echo "shadowsock.service done."
 
   cat >/etc/polipo/config<<-EOF
-    proxyAddress = "0.0.0.0"
-    socksParentProxy = "localhost:8119"
-    socksProxyType = socks5
-    proxyPort = 1087
+proxyAddress = "0.0.0.0"
+socksParentProxy = "localhost:8119"
+socksProxyType = socks5
+proxyPort = 1087
 EOF
   echo "polipo.conf done."
 
@@ -232,17 +234,17 @@ EOF
   systemctl start polipo
 
   cat >>.bashrc<<-EOF
-    #http proxy
-    proxy(){
-      no_proxy="127.0.0.1, localhost"
-      export http_proxy="http://127.0.0.1:1087"
-      export https_proxy=\$http_proxy
-    }
+#http proxy
+proxy(){
+  no_proxy="127.0.0.1, localhost"
+  export http_proxy="http://127.0.0.1:1087"
+  export https_proxy=\$http_proxy
+}
 
-    noproxy(){
-      unset http_proxy
-      unset https_proxy
-    }
+noproxy(){
+  unset http_proxy
+  unset https_proxy
+}
 EOF
 }
 
@@ -258,7 +260,7 @@ gfw
 
 # ss_server
 ss_server(){
-  ss_serverconf=/etc/shadowsocks1.json
+  ss_serverconf=/etc/shadowsocks.json
 
   if telnet ds.test-ipv6.com 79 &>/dev/null
   then
@@ -270,75 +272,76 @@ ss_server(){
   read -p "input the amount of user account: " amount
 
   cat >${ss_serverconf}<<-EOF
-    {
-      "server":["[::0]", "0.0.0.0"],
-      "port_password":{
+{
+  "server":["[::0]", "0.0.0.0"],
+  "port_password":{
 EOF
 
   for ((i=0; i<${amount}; i++))
   do
     read -p "port: " port
-    read -p "passwd: " passwd
+    read -sp "passwd: " passwd
+    echo ""
     cat >>${ss_serverconf}<<-EOF
-      "${port}":"${passwd}",
+    "${port}":"${passwd}",
 EOF
   done
 
   sed -i '$ s/,//' ${ss_serverconf}
 
   cat >>${ss_serverconf}<<-EOF
-    },
-    "_comment":{
+  },
+  "_comment":{
     "left":"behind"
-    },
-    "timeout":600,
-    "method":"aes-256-gcm",
-    "fast_open":true,
-    "plugin":"obfs-server",
-    "plugin_opts":"obfs=tls",
-    "dns_ipv6":${ipv6},
-    "workers":${amount}
-  }
+  },
+  "timeout":600,
+  "method":"aes-256-gcm",
+  "fast_open":true,
+  "plugin":"obfs-server",
+  "plugin_opts":"obfs=tls",
+  "dns_ipv6":${ipv6},
+  "workers":${amount}
+}
 EOF
   echo "${amount} users added."
 
-  ss_server.service=/etc/systemd/system/shadowsocks.service
+  ssservice=/etc/systemd/system/shadowsocks.service
 
   if [[ "${ipv6}" = "true" ]]
   then
-    cat >${ss_server.service}<<-EOF
-      [Uint]
-      Description=Shadowsocks-libev
-      Wants=network-online.target
-      After=network.target
+    cat >${ssservice}<<-EOF
+[Uint]
+Description=Shadowsocks-libev
+Wants=network-online.target
+After=network.target
 
-      [Service]
-      Type=simple
-      ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u -6 --fast-open
+[Service]
+Type=simple
+ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u -6 --fast-open
 
-      [Install]
-      WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
   else
-    cat >${ss_server.service}<<-EOF
-      [Uint]
-      Description=Shadowsocks-libev
-      Wants=network-online.target
-      After=network.target
+    cat >${ssservice}<<-EOF
+[Uint]
+Description=Shadowsocks-libev
+Wants=network-online.target
+After=network.target
 
-      [Service]
-      Type=simple
-      ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u --fast-open
+[Service]
+Type=simple
+ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u --fast-open
 
-      [Install]
-      WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
   fi
 
-  echo "${ss_server.service} setup successfully."
+  echo "ss_server setup successfully, enjoy it."
   systemctl daemon-reload
-  systemctl enable ${ss_server.service}
-  systemctl start ${ss_server.service}
+  systemctl enable shadowsocks
+  systemctl start shadowsocks
 }
 
 set_ssserver(){
@@ -350,6 +353,7 @@ then
       ss_server
       ;;
     *)
+      echo "Nothing done."
       ;;
   esac
 fi
