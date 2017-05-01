@@ -302,7 +302,7 @@ EOF
 EOF
   echo "${amount} users added."
 
-  ss_server.service=/etc/systemd/system/shadowsocks1.service
+  ss_server.service=/etc/systemd/system/shadowsocks.service
 
   if [[ "${ipv6}" = "true" ]]
   then
