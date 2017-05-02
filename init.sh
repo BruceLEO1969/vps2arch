@@ -145,7 +145,7 @@ aur(){
     SigLevel = Never
     Server = http://repo.archlinux.fr/\$arch
 EOF
-echo "AUR has been successfully enabled."
+  echo "AUR has been successfully enabled."
   fi
 }
 
@@ -161,8 +161,8 @@ net.ipv4.tcp_congestion_control = bbr
 net.ipv4.tcp_fastopen = 3
 EOF
 
-sysctl --system 1>/dev/null
-echo "BBR has been successfully enable."
+  sysctl --system 1>/dev/null
+  echo "BBR has been successfully enable."
 }
 
 bbr_enable
@@ -366,19 +366,48 @@ normal_user(){
   printf "Add a normal user:\n######BLANK to skip######\n"
   read -p "Set your username: " username
   case ${username} in
-    ""|*[A-Z]*|*[0-9]*)
-      echo "Wrog input."
-      echo "You have not set a normal user, that's not a good idea."
-      ;;
     [a-z]*)
       useradd -c ${username} -m -g users -G wheel -s $(which zsh) ${username}
       passwd ${username}
+      mkdir /home/${username}/.ssh
+      touch /home/${username}/.ssh/authorized_keys
+      echo "Paste certificate and end with a blank line:"
+      sshkey=$(sed '/^$/q')
+      echo ${sshkey} >> /home/${username}/.ssh/authorized_keys
+      echo "SSH Key has been added."
+      chown -R ${username}:users /home/${username}/.ssh
+      chmod 600 /home/${username}/.ssh/authorized_keys
       echo "User ${username} setup successfully."
+      ;;
+    ""|*[A-Z]*|*[0-9]*)
+      echo "Wrog input."
+      echo "You have not set a normal user, that's not a good idea."
       ;;
   esac
 }
 
 normal_user
+
+# harden ssh
+harden_ssh(){
+  read -p "Define your SSH port: " sshport
+  sshconf=/etc/ssh/sshd_config
+  sed -i 's/^#Port 22/'"Port ${sshport}"'/' ${sshconf}
+  sed -i 's/PermitRootLogin yes/PermitRootLogin no/' ${sshconf}
+  sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' ${sshconf}
+  sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords no/' ${sshconf}
+  echo "Harden SSH finished."
+}
+
+whatever_ssh(){
+  if [[ ! -z ${username} ]]
+  then
+    echo ${username}
+    harden_ssh
+  fi
+}
+
+whatever_ssh
 
 # change into multi-user mode
 systemctl set-default multi-user.target
