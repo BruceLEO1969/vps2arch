@@ -22,14 +22,13 @@ zsh_config(){
   curl -L git.io/antigen > .antigen/antigen.zsh &>/dev/null
   echo "Update .zshrc file."
   curl -LO https://raw.githubusercontent.com/BruceLEO1969/vps2arch/master/.zshrc &>/dev/null
-  source .zshrc &>/dev/null
   echo "zsh_config finished."
 }
 
 # tmux_config
 tmux_config(){
   rm -rf .tmux
-  git clone https://github.com/BruceLEO1969/.tmux.git
+  git clone https://github.com/BruceLEO1969/.tmux.git &>/dev/null
   ln -s -f .tmux/.tmux.conf
   cp .tmux/.tmux.conf.local .
   echo "tmux setup finished."
