@@ -175,7 +175,7 @@ arch_devel(){
   pacman -Sy base-devel python-pip tmux vim lua nmap yaourt zmap git zsh \
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
-    speedtest-cli --noconfirm &>/dev/null
+    nghttp2 speedtest-cli --noconfirm &>/dev/null
 }
 
 arch_devel
@@ -371,6 +371,7 @@ normal_user(){
       passwd ${username}
       mkdir /home/${username}/.ssh
       touch /home/${username}/.ssh/authorized_keys
+      sed -i 's/^#%wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
       echo "Paste certificate and end with a blank line:"
       sshkey=$(sed '/^$/q')
       echo ${sshkey} >> /home/${username}/.ssh/authorized_keys
@@ -400,7 +401,7 @@ harden_ssh(){
 }
 
 whatever_ssh(){
-  if [[ ! -z ${username} ]]
+  if [[ -n ${username} ]]
   then
     echo ${username}
     harden_ssh
