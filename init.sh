@@ -175,7 +175,8 @@ arch_devel(){
   pacman -Sy base-devel python-pip tmux vim lua nmap yaourt zmap git zsh \
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
-    nghttp2 speedtest-cli --noconfirm &>/dev/null
+    nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli inxi \
+    --noconfirm &>/dev/null
 }
 
 arch_devel
