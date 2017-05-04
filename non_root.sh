@@ -19,7 +19,7 @@ zsh_config(){
   cd ~
   mkdir -p .antigen
   echo "Setting up antigen, just be patients."
-  curl -L git.io/antigen > .antigen/antigen.zsh &>/dev/null
+  curl -L git.io/antigen -o .antigen/antigen.zsh &>/dev/null
   echo "Update .zshrc file."
   curl -LO https://raw.githubusercontent.com/BruceLEO1969/vps2arch/master/.zshrc &>/dev/null
   echo "zsh_config finished."
@@ -34,11 +34,24 @@ tmux_config(){
   echo "tmux setup finished."
 }
 
+# vim_config
+vim_config(){
+  curl https://raw.githubusercontent.com/BruceLEO1969/spf13-vim/3.0/bootstrap.sh -sL -o - | sh
+}
+
+# softwares install
+install(){
+  yaourt -Sy ccat --noconfirm &>/dev/null
+}
+
 # main function
 main(){
   privilege_check
   zsh_config
   tmux_config
+  vim_config
+  install
 }
 
 main
+zsh
