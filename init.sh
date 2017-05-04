@@ -32,8 +32,6 @@ alert(){
   sleep 0.5
 }
 
-alert
-
 # location
 get_location(){
   if curl -s myip.ipip.net | grep -q '中国'
@@ -45,8 +43,6 @@ get_location(){
     echo "Congratulations, your server connect to the true network."
   fi
 }
-
-get_location
 
 # setup the system environment 
 envset(){
@@ -83,8 +79,6 @@ envset(){
   locale-gen 1>/dev/null
 }
 
-envset
-
 # set DNS for the system
 china_dns(){
   dnsconf=/etc/resolv.conf
@@ -103,14 +97,13 @@ EOF
   fi
 }
 
+# setdns
 setdns(){
   if [[ "${location}" = "China" ]]
   then
     china_dns
   fi
 }
-
-setdns
 
 # update the mirrorlist to the local sever
 mirrorupdate(){
@@ -132,8 +125,6 @@ mirrorupdate(){
   fi
 }
 
-mirrorupdate
-
 # enable AUR
 aur(){
   aurconf=/etc/pacman.conf
@@ -149,8 +140,6 @@ EOF
   fi
 }
 
-aur
-
 # BBR enable
 bbr_enable(){
   bbrconf=/etc/sysctl.d/99-sysctl.conf
@@ -165,8 +154,6 @@ EOF
   echo "BBR has been successfully enable."
 }
 
-bbr_enable
-
 # install the base-devel
 arch_devel(){
   echo "Arch base-devel is proccessing installing, please be patients."
@@ -178,8 +165,6 @@ arch_devel(){
     nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli inxi \
     thefuck --noconfirm &>/dev/null
 }
-
-arch_devel
 
 # http proxy for shell
 ss_local(){
@@ -249,6 +234,7 @@ noproxy(){
 EOF
 }
 
+# gfw
 gfw(){
   if [[ "${location}" = "China" ]]
   then
@@ -256,8 +242,6 @@ gfw(){
     echo "Fuck this forshaken land."
   fi
 }
-
-gfw
 
 # ss_server
 ss_server(){
@@ -345,6 +329,7 @@ EOF
   systemctl start shadowsocks
 }
 
+# set_ssserver
 set_ssserver(){
 if [[ "${location}" = "Worldwide" ]]
 then
@@ -359,8 +344,6 @@ then
   esac
 fi
 }
-
-set_ssserver
 
 # add normal user
 normal_user(){
@@ -388,8 +371,6 @@ normal_user(){
   esac
 }
 
-normal_user
-
 # harden ssh
 harden_ssh(){
   read -p "Define your SSH port: " sshport
@@ -401,6 +382,7 @@ harden_ssh(){
   echo "Harden SSH finished."
 }
 
+# whatever_ssh
 whatever_ssh(){
   if [[ -n ${username} ]]
   then
@@ -409,7 +391,37 @@ whatever_ssh(){
   fi
 }
 
-whatever_ssh
+# add blackarch repo
+blackarch(){
+  read -p "Are you ready to add BlackArch repo? [Yes | No]: " black
+  case ${black} in
+    [Yy]|[Yy]es)
+      echo "Here we go!"
+      curl -sL https://blackarch.org/strap.sh -o - | sh
+      ;;
+    *)
+      echo "Well, you can enable BlackArch repo anytime you want."
+      ;;
+}
+
+# main
+main(){
+  alert
+  get_location
+  envset
+  setdns
+  mirrorupdate
+  aur
+  bbr_enable
+  arch_devel
+  gfw
+  set_ssserver
+  normal_user
+  whatever_ssh
+  blackarch
+}
+
+main
 
 # change into multi-user mode
 systemctl set-default multi-user.target
