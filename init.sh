@@ -402,6 +402,7 @@ blackarch(){
     *)
       echo "Well, you can enable BlackArch repo anytime you want."
       ;;
+  esac
 }
 
 # main
