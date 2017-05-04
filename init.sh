@@ -176,7 +176,7 @@ arch_devel(){
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
     nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli inxi \
-    --noconfirm &>/dev/null
+    thefuck --noconfirm &>/dev/null
 }
 
 arch_devel
