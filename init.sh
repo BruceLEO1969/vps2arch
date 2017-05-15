@@ -132,9 +132,9 @@ aur(){
   then
     cat >>$aurconf<<-EOF
 
-    [archlinuxfr]
-    SigLevel = Never
-    Server = http://repo.archlinux.fr/\$arch
+[archlinuxfr]
+SigLevel = Never
+Server = http://repo.archlinux.fr/\$arch
 EOF
   echo "AUR has been successfully enabled."
   fi
@@ -355,7 +355,7 @@ normal_user(){
       passwd ${username}
       mkdir /home/${username}/.ssh
       touch /home/${username}/.ssh/authorized_keys
-      sed -i 's/^#%wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+      sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
       echo "Paste certificate and end with a blank line:"
       sshkey=$(sed '/^$/q')
       echo ${sshkey} >> /home/${username}/.ssh/authorized_keys
