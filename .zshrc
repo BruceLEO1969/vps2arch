@@ -36,8 +36,8 @@ function noproxy(){
 
 #alias
 alias tm='tmux att -t Tmux || tmux new -s Tmux'
-alias ntm='tmux new -s Tmux'
-alias atm='tmux att -t Tmux'
+alias nt='tmux new -s Tmux'
+alias at='tmux att -t Tmux'
 alias cat=ccat
 alias ndig='dig +noall +answer'
 
