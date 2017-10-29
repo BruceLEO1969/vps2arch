@@ -11,6 +11,8 @@ zsh_config(){
   mkdir -p .antigen
   echo "Setting up antigen, just be patients."
   curl -L git.io/antigen -o .antigen/antigen.zsh &>/dev/null
+  echo "Setting dircolors."
+  curl -L https://raw.githubusercontent.com/seebi/dircolors-solarized/master/dircolors.ansi-universal -o ~/.dir_colors &>/dev/null
   echo "Update .zshrc file."
   curl -LO https://raw.githubusercontent.com/BruceLEO1969/vps2arch/master/.zshrc &>/dev/null
   echo "zsh_config finished."
