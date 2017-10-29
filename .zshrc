@@ -66,3 +66,5 @@ export KEYTIMEOUT=1
 mobi(){
   antigen theme robbyrussell
 }
+
+eval $(dircolors ~/.dir_colors)
