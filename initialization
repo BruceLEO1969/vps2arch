@@ -46,7 +46,7 @@ get_location(){
 
 # setup the system environment 
 envset(){
-  if [[ $(hostname) = "localhost" ]]
+  if [[ $(hostname) = "archlinux" ]]
   then
     echo "Hostname has not been set yet."
     read -p "Set your hostname here: " hostname
@@ -163,7 +163,7 @@ arch_devel(){
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
     nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli inxi \
-    thefuck mosh --noconfirm &>/dev/null
+    thefuck mosh rng-tools exa ipython --noconfirm &>/dev/null
 }
 
 # http proxy for shell
@@ -183,7 +183,7 @@ ss_local(){
   "method":"${method}",
   "password":"${password}",
   "plugin":"obfs-local",
-  "plugin_opts":"obfs=tls;obfs-host=www.baidu.com",
+  "plugin_opts":"obfs=tls;obfs-host=www.apple.com",
   "timeout":60,
   "local_port":${localport}
 }
@@ -281,7 +281,7 @@ EOF
     "left":"behind"
   },
   "timeout":600,
-  "method":"aes-256-gcm",
+  "method":"chacha20-ietf-poly1305",
   "fast_open":true,
   "plugin":"obfs-server",
   "plugin_opts":"obfs=tls",
