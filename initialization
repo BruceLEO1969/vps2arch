@@ -159,11 +159,13 @@ arch_devel(){
   echo "Arch base-devel is proccessing installing, please be patients."
   echo "The time spent depends on your network performance."
   echo "Normally less then 5 minutes."
-  pacman -Sy base-devel python-pip tmux vim lua nmap yaourt zmap git zsh \
+  pacman -Sy base-devel python-pip tmux vim lua nmap zmap git zsh \
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
-    nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli inxi \
-    thefuck mosh rng-tools exa ipython --noconfirm &>/dev/null
+    nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli \
+    thefuck rng-tools exa ipython v2ray sysstat --noconfirm
+	systemctl enable rngd.service
+	systemctl start rngd.service
 }
 
 # http proxy for shell
@@ -183,7 +185,7 @@ ss_local(){
   "method":"${method}",
   "password":"${password}",
   "plugin":"obfs-local",
-  "plugin_opts":"obfs=tls;obfs-host=www.apple.com",
+  "plugin_opts":"obfs=http;obfs-host=www.apple.com",
   "timeout":60,
   "local_port":${localport}
 }
@@ -191,7 +193,7 @@ EOF
   echo "shadowsock.json done."
 
   cat >/etc/systemd/system/shadowsocks.service<<-EOF
-[Uint]
+[Unit]
 Description=Shadowsocks-libev
 Wants=network-online.target
 After=network.target
@@ -223,7 +225,7 @@ EOF
   cat >>.bashrc<<-EOF
 #http proxy
 proxy(){
-  no_proxy="127.0.0.1, localhost"
+  export no_proxy="127.0.0.1, localhost"
   export http_proxy="http://127.0.0.1:1087"
   export https_proxy=\$http_proxy
 }
@@ -284,7 +286,7 @@ EOF
   "method":"chacha20-ietf-poly1305",
   "fast_open":true,
   "plugin":"obfs-server",
-  "plugin_opts":"obfs=tls",
+  "plugin_opts":"obfs=http;fast-open",
   "dns_ipv6":${ipv6},
   "workers":${amount}
 }
@@ -296,28 +298,34 @@ EOF
   if [[ "${ipv6}" = "true" ]]
   then
     cat >${ssservice}<<-EOF
-[Uint]
+[Unit]
 Description=Shadowsocks-libev
 Wants=network-online.target
 After=network.target
+After=rngd.service
 
 [Service]
 Type=simple
+User=archon
 ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u -6 --fast-open
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
   else
     cat >${ssservice}<<-EOF
-[Uint]
+[Unit]
 Description=Shadowsocks-libev
 Wants=network-online.target
 After=network.target
+After=rngd.service
 
 [Service]
 Type=simple
+User=archon
 ExecStart=/usr/bin/ss-manager --manager-address /tmp/ss-manager.sock --executable /usr/bin/ss-server -c /etc/shadowsocks.json -u --fast-open
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -338,6 +346,31 @@ then
   case ${willing} in
     [Yy]|[Yy]es)
       ss_server
+      ;;
+    *)
+      echo "Nothing done."
+      ;;
+  esac
+fi
+}
+
+# v2ray_server
+v2ray_server(){
+	curl -sL https://raw.githubusercontent.com/BruceLEO1969/vps2arch/master/config.v2ray.json -o /etc/v2ray/config.json
+	mkdir -p /var/log/v2ray
+	touch /var/log/v2ray/{access,error}.log
+	systemctl enable v2ray
+	systemctl start v2ray
+}
+
+# set_v2ray_server
+set_v2ray_server(){
+if [[ "${location}" = "Worldwide" ]]
+then
+  read -p "Your server is fine to set a v2ray server, would you? [Yes | No]: " willing
+  case ${willing} in
+    [Yy]|[Yy]es)
+      v2ray_server
       ;;
     *)
       echo "Nothing done."
@@ -406,6 +439,16 @@ blackarch(){
   esac
 }
 
+# block mail ports
+iptable(){
+	iptables -A OUTPUT -p tcp --dport 25 -j REJECT
+	iptables -A OUTPUT -p tcp --dport 465 -j REJECT
+	iptables -A OUTPUT -p tcp --dport 587 -j REJECT
+	iptables-save > /etc/iptables/iptables.rules
+	systemctl enable iptables
+	systemctl start iptables
+}
+
 # main
 main(){
   alert
@@ -421,6 +464,7 @@ main(){
   normal_user
   whatever_ssh
   blackarch
+	iptable
 }
 
 main
