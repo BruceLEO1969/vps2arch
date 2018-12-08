@@ -24,7 +24,7 @@ prompt_context(){}
 
 #http proxy
 function proxy(){
-  no_proxy="127.0.0.1, localhost"
+  export no_proxy="127.0.0.1, localhost"
   export http_proxy="http://127.0.0.1:1087"
   export https_proxy=$http_proxy
 }
@@ -38,7 +38,6 @@ function noproxy(){
 alias tm='tmux att -t Tmux || tmux new -s Tmux'
 alias nt='tmux new -s Tmux'
 alias at='tmux att -t Tmux'
-alias cat=ccat
 alias ndig='dig +noall +answer'
 
 #vi mode
@@ -68,3 +67,7 @@ mobi(){
 }
 
 eval $(dircolors ~/.dir_colors)
+
+if [ -z "$TMUX"  ]; then
+	tmux attach -t Tmux || tmux new -s Tmux
+fi
