@@ -74,3 +74,5 @@ fi
 
 cd /data/Server
 . ./build_env.sh
+
+alias n='/etc/motd.sh'
