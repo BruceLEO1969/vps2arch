@@ -39,6 +39,9 @@ alias tm='tmux att -t Tmux || tmux new -s Tmux'
 alias nt='tmux new -s Tmux'
 alias at='tmux att -t Tmux'
 alias ndig='dig +noall +answer'
+alias n='/etc/motd.sh'
+alias tp="netstat -n | awk '/^tcp/ {++S[\$NF]} END {for(a in S) print a, S[a]}'"
+alias v='nvim'
 
 #vi mode
 bindkey -v
@@ -74,5 +77,3 @@ fi
 
 cd /data/Server
 . ./build_env.sh
-
-alias n='/etc/motd.sh'
