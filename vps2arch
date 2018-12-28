@@ -173,6 +173,9 @@ configure_bootloader() {
 			*)		root_devs="${root_devs:+$root_devs }$tmp"	;;
 			esac
 		done
+		if [[ ! -d /boot/grub ]]; then
+			mkdir -p /boot/grub
+		fi
 		grub-mkconfig > /boot/grub/grub.cfg
 		for root_dev in $root_devs; do
 			grub-install --target=i386-pc --recheck --force "$root_dev"
