@@ -74,6 +74,3 @@ eval $(dircolors ~/.dir_colors)
 if [ -z "$TMUX"  ]; then
 	tmux attach -t Tmux || tmux new -s Tmux
 fi
-
-cd /data/Server
-. ./build_env.sh
