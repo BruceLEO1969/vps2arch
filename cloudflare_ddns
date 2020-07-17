@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # CHANGE THESE
-auth_email="bruceleo1969@gmail.com"
-auth_key="9d10d6046475bc49fb0d7688af66a21028fd6"
+auth_email=""
+auth_key=""
 read -p "Enter TLD: " zone_name
 read -p "Defind subdomain: " subdm
 record_name=${subdm}.${zone_name}
