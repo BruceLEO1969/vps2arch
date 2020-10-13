@@ -163,7 +163,7 @@ arch_devel(){
     bash-completion net-tools dnsutils vnstat htop bc shadowsocks-libev zip \
     simple-obfs unzip haveged lsof rsync strace httpie gnu-netcat strace \
     nghttp2 the_silver_searcher jq tcpdump shellcheck speedtest-cli \
-    thefuck rng-tools exa ipython v2ray sysstat --noconfirm
+    thefuck rng-tools exa ipython v2ray sysstat inetutils --noconfirm
 	systemctl enable rngd.service
 	systemctl start rngd.service
 }
