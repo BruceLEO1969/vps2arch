@@ -74,3 +74,8 @@ eval $(dircolors ~/.dir_colors)
 if [ -z "$TMUX"  ]; then
 	tmux attach -t Tmux || tmux new -s Tmux
 fi
+
+#autoload -Uz compinit
+#compinit
+#source <(kubectl completion zsh)
+#source <(helm completion zsh)
